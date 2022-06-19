@@ -29,7 +29,7 @@ def lemmatize(text):
     The words have to be tokenized before lemmatization.
     """
     lemmatizer = nltk.stem.WordNetLemmatizer()                      
-    w_tokenizer = nltk.tokenize.WhitespaceTokenizer()       # the words have to be tokenized before lemmatization
+    w_tokenizer = nltk.tokenize.WhitespaceTokenizer()      
     
     return [lemmatizer.lemmatize(w, get_wordnet_pos(w)) for w in w_tokenizer.tokenize(text)]
 
@@ -65,6 +65,6 @@ artist_prediction = loaded_model.predict(lyrics_vector)
 probability = loaded_model.predict_proba(lyrics_vector)
 
 if artist_prediction == 1:
-    print (f'{input(" artist1: ")} with a {probability[0][1]} probability')
+    print (f'Amy Winehouse with a {probability[0][1]} probability')
 else:
-    print (f'{input(" artist2: ")} with a {probability[0][0]} probability')
+    print (f'Rage Against the Machine with a {probability[0][0]} probability')
