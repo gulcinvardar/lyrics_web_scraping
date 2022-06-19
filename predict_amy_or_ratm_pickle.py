@@ -10,9 +10,12 @@ from nltk.corpus import wordnet
 nltk.download('averaged_perceptron_tagger')
 
 def get_wordnet_pos(word):
-    """Map POS tag to first character lemmatize() accepts"""
+    """
+    Map POS tag to first character lemmatize() accepts
+    Uses labels for the word type that NLTK accepts.
+    """
     tag = nltk.pos_tag([word])[0][1][0].upper()
-    tag_dict = {"J": wordnet.ADJ,          # these are the labels for the word type that NLTK accepts
+    tag_dict = {"J": wordnet.ADJ,          
                 "N": wordnet.NOUN,
                 "V": wordnet.VERB,
                 "R": wordnet.ADV}
@@ -21,8 +24,11 @@ def get_wordnet_pos(word):
 
 
 def lemmatize(text):
-    '''Lemmatize the words based on the word type using get_wordnet_pos'''
-    lemmatizer = nltk.stem.WordNetLemmatizer()              # lemmatize the words           
+    """
+    Lemmatize the words based on the word type using get_wordnet_pos
+    The words have to be tokenized before lemmatization.
+    """
+    lemmatizer = nltk.stem.WordNetLemmatizer()                      
     w_tokenizer = nltk.tokenize.WhitespaceTokenizer()       # the words have to be tokenized before lemmatization
     
     return [lemmatizer.lemmatize(w, get_wordnet_pos(w)) for w in w_tokenizer.tokenize(text)]
@@ -36,10 +42,11 @@ def list_to_string(s):
 
 
 def lemmatized_str(df):
-    '''Lemmatize the words and join them in a string'''
-    df['text_lamme'] = df['song-lyrics'].apply(lemmatize)    # create a new column with lemmatized words: brings a list
-    df['lyrics'] = df['text_lamme'].apply(list_to_string)      # create a new column with words joined in a string
-    df = df.drop(columns= ['song-lyrics', 'text_lamme'])     # drop the unused columns
+    """Lemmatize the words and join them in a string
+    Create a new column with words joined in a string"""
+    df['text_lamme'] = df['song-lyrics'].apply(lemmatize)
+    df['lyrics'] = df['text_lamme'].apply(list_to_string)
+    df = df.drop(columns= ['song-lyrics', 'text_lamme'])
 
     return df
 

@@ -20,26 +20,31 @@ nltk.download('averaged_perceptron_tagger')
 
 
 
-def create_df():
+def create_df(artist1, artist2):
     '''Read the files and return the concatenated df
     The artist names will be used to open the file and also to give the prediction and save the pickle
     '''
-    df_1 = pd.read_csv('/Users/gulcinvardar/Desktop/Data_Science_Bootcamp/stationary-sriracha-student-code/exercises/week_4/' + artist1+ '.csv', index_col=0)                                              # read the first artist
+    df_1 = pd.read_csv('/Users/gulcinvardar/Desktop/Data_Science_Bootcamp/stationary-sriracha-student-code/exercises/week_4/' + artist1 + '.csv', index_col=0)                                              # read the first artist
     df_1['artist'] = 1                                                                            
     df_2 = pd.read_csv('/Users/gulcinvardar/Desktop/Data_Science_Bootcamp/stationary-sriracha-student-code/exercises/week_4/' + artist2 + '.csv', index_col=0)                          # read the second artist
     df_2['artist'] = 0                                                                            
-    df = pd.concat([df_1, df_2]).drop(columns = ['title', 'links'])                               # create a data frame joining the two artists
+    df = pd.concat([df_1, df_2]).drop(columns = ['title', 'links'])                              
     
     return df
 
 
 def clean_up(df):
-    '''Clean the blank, remove digits, regain the censored slang'''
-    df = df.drop(df[df['song-lyrics'] == '[Instrumental]'].index)           # remove the word instrumental
-    df = df.drop(df[df['song-lyrics'] == 'blank'].index)                    # remove the word blank which comes from empty lyrics sites
-    df['song-lyrics'] = df['song-lyrics'].str.replace('\d+', '')            # remove the digits
-    df['song-lyrics'] = df['song-lyrics'].str.replace('\w\w\*\*', 'shit')   # get back the sensored swear word
-    df['song-lyrics'] = df['song-lyrics'].str.replace('\w\*\*', 'fuck')     # get back the sensored swear word
+    '''
+    Clean the blank, remove digits, regain the censored slang.
+    Removes digits.
+    Removes the words: instrumental, blank.
+    Retrieves the sensored swear words back.
+    '''
+    df = df.drop(df[df['song-lyrics'] == '[Instrumental]'].index)
+    df = df.drop(df[df['song-lyrics'] == 'blank'].index)
+    df['song-lyrics'] = df['song-lyrics'].str.replace('\d+', '')
+    df['song-lyrics'] = df['song-lyrics'].str.replace('\w\w\*\*', 'shit')
+    df['song-lyrics'] = df['song-lyrics'].str.replace('\w\*\*', 'fuck')
     df= df.set_index(['artist'])
     
     return df
@@ -48,7 +53,7 @@ def clean_up(df):
 def get_wordnet_pos(word):
     """Map POS tag to first character lemmatize() accepts"""
     tag = nltk.pos_tag([word])[0][1][0].upper()
-    tag_dict = {"J": wordnet.ADJ,          # these are the labels for the word type that NLTK accepts
+    tag_dict = {"J": wordnet.ADJ,          
                 "N": wordnet.NOUN,
                 "V": wordnet.VERB,
                 "R": wordnet.ADV}
@@ -57,9 +62,12 @@ def get_wordnet_pos(word):
 
 
 def lemmatize(text):
-    '''Lemmatize the words based on the word type using get_wordnet_pos'''
-    lemmatizer = nltk.stem.WordNetLemmatizer()              # lemmatize the words           
-    w_tokenizer = nltk.tokenize.WhitespaceTokenizer()       # the words have to be tokenized before lemmatization
+    """
+    Lemmatize the words based on the word type using get_wordnet_pos
+    The words have to be tokenized before lemmatization.
+    """
+    lemmatizer = nltk.stem.WordNetLemmatizer()                     
+    w_tokenizer = nltk.tokenize.WhitespaceTokenizer()      
     
     return [lemmatizer.lemmatize(w, get_wordnet_pos(w)) for w in w_tokenizer.tokenize(text)]
 
@@ -72,10 +80,14 @@ def list_to_string(s):
 
 
 def lemmatized_str(df):
-    '''Lemmatize the words and join them in a string'''
-    df['text_lamme'] = df['song-lyrics'].apply(lemmatize)    # create a new column with lemmatized words: brings a list
-    df['lyrics'] = df['text_lamme'].apply(list_to_string)      # create a new column with words joined in a string
-    df = df.drop(columns= ['song-lyrics', 'text_lamme'])     # drop the unused columns
+    """
+    Lemmatize the words and join them in a string.
+    Create a new column with words joined in a string.
+    Drop the unused columns.
+    """
+    df['text_lamme'] = df['song-lyrics'].apply(lemmatize)
+    df['lyrics'] = df['text_lamme'].apply(list_to_string)
+    df = df.drop(columns= ['song-lyrics', 'text_lamme'])
 
     return df
 
@@ -89,11 +101,21 @@ def print_evaluations(ytrue, ypred, model_name):
 
 def vec(X_train, X_test):
     '''Vectorize both the train and the test data'''
-    vectorizer = TfidfVectorizer(ngram_range= (1,2), max_df=0.8, min_df= 0.025, strip_accents='ascii', stop_words='english')
+    vectorizer = TfidfVectorizer(
+                    ngram_range= (1,2), max_df=0.8, 
+                    min_df= 0.025, strip_accents='ascii', 
+                    stop_words='english'
+                    )
     X_matrix = vectorizer.fit_transform(X_train)
-    X_train_vec = pd.DataFrame(X_matrix.todense(), columns=vectorizer.get_feature_names())
+    X_train_vec = pd.DataFrame(
+                    X_matrix.todense(), 
+                    columns=vectorizer.get_feature_names()
+                    )
     X_matrix_test = vectorizer.transform(X_test)
-    X_test_vec = pd.DataFrame(X_matrix_test.todense(), columns=vectorizer.get_feature_names())
+    X_test_vec = pd.DataFrame(
+                    X_matrix_test.todense(), 
+                    columns=vectorizer.get_feature_names()
+                    )
 
     return X_train_vec, X_test_vec, vectorizer
 
@@ -109,14 +131,18 @@ def create_model_and_predict(X_train_vec, y_train, X_test_vec):
     return model
 
 def predict_new_lyrics(new_lyrics):
-    ''' the lyrics will be given by the user
-        they will first be processed and then the artist will be predicted
+    ''' 
+    The lyrics will be given by the user
+    They will first be processed and then the artist will be predicted
     '''
     new_lyrics_processed = lemmatized_str(new_lyrics)
     X_new_lyrics = new_lyrics_processed['lyrics']
 
     new_lyrics_matrix = vectorizer.transform(X_new_lyrics)
-    new_lyrics_vec = pd.DataFrame(new_lyrics_matrix.todense(), columns=vectorizer.get_feature_names())
+    new_lyrics_vec = pd.DataFrame(
+                    new_lyrics_matrix.todense(), 
+                    columns=vectorizer.get_feature_names()
+                    )
     
     results =  model.predict(new_lyrics_vec)
     probability = model.predict_proba(new_lyrics_vec)
@@ -124,7 +150,9 @@ def predict_new_lyrics(new_lyrics):
     return probability, results, new_lyrics
 
 def pickle_dump(data, filename):
-    ''' load the vectorizer and the model into pickle for later predictions using CLI. Example: file name: predict_amy_or_ratm_pickle.py '''
+    '''
+    Load the vectorizer and the model into pickle for later predictions using CLI. 
+    Example usage: file name: predict_amy_or_ratm_pickle.py '''
     pickle.dump(data, open(filename, 'wb'))
 
 
@@ -133,7 +161,7 @@ artist1 = input('the file name_1: ')
 artist2 = input('the file name_2: ')
 
 # create the data frame
-df = create_df()
+df = create_df(artist1, artist2)
 df_clean = clean_up(df)
 df_processed = lemmatized_str(df_clean)
 

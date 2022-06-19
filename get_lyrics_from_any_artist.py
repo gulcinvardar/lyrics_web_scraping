@@ -11,9 +11,9 @@ from sklearn.preprocessing import FunctionTransformer
 
 def get_url(url):
     '''
-    Url will be given by the user, it should be in the https://lyrics.az/artist/allalbums.html format
+    Artist name will be given by the user
     If the artist is not found, it will print 'artist not found
-        '''
+    '''
     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
     html = requests.get(url, headers = headers)
     if html.status_code == 404:
@@ -40,8 +40,8 @@ def get_links_and_titles(soup):
 def get_song_lyrics(df):
     '''
     Get the song lyrics with request and BS from the links in the df. 
-    While the script is running, it will print the link to see the progress
-        '''
+    While the script is running, it will print the link to see the progress.
+    '''
     df['song-lyrics'] = 'blank'
     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
     for i in range(len(df.links)):
