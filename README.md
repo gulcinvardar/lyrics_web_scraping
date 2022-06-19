@@ -3,11 +3,10 @@
 This project was written during Spiced Academy Data Science Bootcamp. 
 It is one the weekly projects.
 
-The contents include files to scrape lyrics from any given artist using BeautifulSoup and save them as a dataframe, 
-to create a Logistic Regression based ML model for two selected artists, 
-and an example of prediction of the artist between the two selected artists (here, Amy Winehouse and Rage Against the Machine)
-using CLI when new lyrics are entered by the user as an input.
-
+The contents include 
+- files to scrape lyrics from any given artist, 
+- to create a Logistic Regression model for two selected artists, 
+- and an example of prediction of the artist when new lyrics are entered. 
 
 
 ### Usage
@@ -16,6 +15,7 @@ using CLI when new lyrics are entered by the user as an input.
 
     It uses 'https://lyrics.az/' to scrape the lyrics of the artist given by the user. 
     The artist name is converted to lower case matching the 'https://lyrics.az/' title style.
+    The lyrics are scraped using BeautifulSoup.
     The lyrics of the songs of the artist is inserted into a dataframe and saved as a csv file for further usage.
     While crawling in the web-site, it prints which song link is being scraped.
     
@@ -23,10 +23,12 @@ using CLI when new lyrics are entered by the user as an input.
 - song_lyrics_with_artist_of_choice_model.py
 
     Two artists among the saved csv files are used to create a Logistic Regression model. 
-    Select two artists from the saved csv files. The file names should be written as the name of the file without the .csv extension.
+    Select two artists from the saved csv files. The file names should be written as the name of the file without the '.csv' extension.
     The first artist is labeled as 1, whereas the second artist is labeled 0. 
-    The lyrics in the csv file are read into a dtaframe and cleaned up from digits and punctuation. The lyrics were lemmatized using NLTK. 
+    The lyrics in the csv file are read into a dataframe and cleaned up from digits and punctuation. The lyrics were lemmatized using NLTK. 
     The vectorization is done with TfidfVectorizer from SciKit.
+    The user is asked to enter new lyrics, that can be also made up. The model predicts which of the two artists is more likely to sing a song with those lyrics. 
+    The model prints the predicted artist name with the prediction probability.
     The vectorizer and the model are saved as pickled files for further usage to predict new lyrics. 
 
 - predict_amy_or_ratm_pickle.py
